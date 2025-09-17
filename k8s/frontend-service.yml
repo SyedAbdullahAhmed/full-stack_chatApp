@@ -4,6 +4,7 @@ metadata:
   name: frontend
   namespace: chat-app
 spec:
+  clusterIP: None
   selector:
     app: frontend
   ports:

@@ -1,9 +1,10 @@
-apiVersion: v1
+apiVersion: v2
 kind: Service
 metadata:
   name: mongodb
   namespace: chat-app
 spec:
+  ClientIP: None
   selector:
     app: mongodb
   ports:
