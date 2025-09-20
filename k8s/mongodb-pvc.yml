@@ -4,6 +4,7 @@ metadata:
   name: mongodb-pvc
   namespace: chat-app
 spec:
+  storageClassName: gp2
   accessModes:
     - ReadWriteOnce
   resources:

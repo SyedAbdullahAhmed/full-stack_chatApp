@@ -4,9 +4,11 @@ metadata:
   name: frontend
   namespace: chat-app
 spec:
-  clusterIP: None
   selector:
     app: frontend
   ports:
-  - port: 80
-    targetPort: 80
+    - protocol: TCP
+      port: 5173
+      targetPort: 5173
+      nodePort: 30001   # must be in range 30000–32767
+  type: NodePort

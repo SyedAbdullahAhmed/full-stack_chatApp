@@ -1,40 +1,36 @@
-# Stage 1: Build
+# Stage 1: Build the React (Vite) app
 FROM node:18-alpine AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Install dependencies
-COPY package.json package-lock.json ./
+# Copy dependency files
+COPY package.json package-lock.json* ./
+
 RUN npm ci
 
 # Copy source code
 COPY . .
 
-# Set environment variables
-ENV NODE_ENV=production
-
-# Build the frontend
+# Build React app
 RUN npm run build
 
-# Stage 2: Serve with Nginx
-FROM nginx:stable-alpine
+# Stage 2: Serve static build with runtime config
+FROM node:18-alpine AS runner
 
-# Remove default Nginx static assets
-RUN rm -rf /usr/share/nginx/html/*
+WORKDIR /app
+ENV NODE_ENV=production
 
-# Copy built assets from builder stage
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Install serve
+RUN npm install -g serve
 
-# Copy custom Nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy build output
+COPY --from=builder /app/dist ./dist
 
-# Expose port 80
-EXPOSE 80
+# Copy entrypoint script to inject runtime config
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Health check
-#HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-#  CMD curl -f http://localhost/ || exit 1
+EXPOSE 5173
 
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Run entrypoint (generates config.js before serving)
+CMD ["/entrypoint.sh"]

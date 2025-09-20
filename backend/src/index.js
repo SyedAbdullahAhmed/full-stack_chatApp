@@ -18,25 +18,33 @@ const __dirname = path.resolve();
 
 app.use(express.json());
 app.use(cookieParser());
+const allowedOrigins = [
+  "http://localhost:5173", // local dev
+  "http://k8s-chatapp-96bfa4e77f-1403137265.us-east-1.elb.amazonaws.com", // ALB
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
     credentials: true,
   })
 );
 
+app.get("/api/health",async(req,res)=> {
+  res.status(200).send("Server is up and running!")
+})
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+// if (process.env.NODE_ENV === "production") {
+//   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
-  });
-}
+//   app.get("*", (req, res) => {
+//     res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+//   });
+// }
 
-server.listen(PORT, () => {
-  console.log("server is running on PORT:" + PORT);
+app.listen(5001, "0.0.0.0", () => {
+  console.log("Server running on port 5001");
   connectDB();
 });

@@ -1,6 +1,8 @@
 import axios from "axios";
 
+const apiUrl = window.RUNTIME_CONFIG?.VITE_APP_URL || "http://localhost:5001";
+
 export const axiosInstance = axios.create({
-  baseURL: import.meta.env.MODE === "development" ? "http://localhost:5001/api" : "/api",
+  baseURL: `${apiUrl}/api`,
   withCredentials: true,
 });

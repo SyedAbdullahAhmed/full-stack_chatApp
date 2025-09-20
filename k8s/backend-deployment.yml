@@ -17,12 +17,14 @@ spec:
     spec:
       containers:
       - name: chatapp-backend
-        image: syedabdullahahmed/chatapp-backend:latest
+        image: syedabdullahahmed/new-chatapp-backend:latest
         ports:
         - containerPort: 5001
         env:
         - name: NODE_ENV
           value: production
+        - name: URL
+          value: http://frontend.chat-app.svc.cluster.local:5173
         - name: MONGODB_URI
           value: "mongodb://mongoadmin:secret@mongodb:27017/dbname?authSource=admin"
         - name: JWT_SECRET
@@ -32,3 +34,4 @@ spec:
               key: jwt 
         - name: PORT
           value: "5001"
+

@@ -8,14 +8,7 @@ This guide explains how to set up an **EKS cluster**, install the **AWS Load Bal
 Create an EKS cluster with 2 `t2.medium` nodes using `eksctl`.
 
 ```bash
-eksctl create cluster \
-  --name chat-app-cluster \
-  --version 1.29 \
-  --region us-east-1 \
-  --nodegroup-name standard-workers \
-  --node-type t2.medium \
-  --nodes 2 \
-  --managed
+eksctl create cluster --name chat-app-cluster --version 1.29 --region us-east-1 --nodegroup-name standard-workers --node-type t2.medium --nodes 2 --managed
 ````
 
 ---
@@ -41,27 +34,13 @@ helm repo update
 
 curl -o iam-policy.json https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/main/docs/install/iam_policy.json
 
-aws iam create-policy \
-  --policy-name AWSLoadBalancerControllerIAMPolicy \
-  --policy-document file://iam-policy.json
+aws iam create-policy --policy-name AWSLoadBalancerControllerIAMPolicy-Tester --policy-document file://iam-policy.json
 
-eksctl utils associate-iam-oidc-provider \
-  --region us-east-1 \
-  --cluster chat-app-cluster \
-  --approve
+eksctl utils associate-iam-oidc-provider --region us-east-1 --cluster chat-app-cluster --approve
 
-eksctl create iamserviceaccount \
-  --cluster chat-app-cluster \
-  --namespace kube-system \
-  --name aws-load-balancer-controller \
-  --attach-policy-arn arn:aws:iam::<ACCOUNT_ID>:policy/AWSLoadBalancerControllerIAMPolicy \
-  --approve
+eksctl create iamserviceaccount --cluster chat-app-cluster --namespace kube-system --name aws-load-balancer-controller --attach-policy-arn arn:aws:iam::<ACCOUNT_ID>:policy/AWSLoadBalancerControllerIAMPolicy-Tester --approve
 
-helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
-  -n kube-system \
-  --set clusterName=chat-app-cluster \
-  --set serviceAccount.create=false \
-  --set serviceAccount.name=aws-load-balancer-controller
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --set clusterName=chat-app-cluster --set serviceAccount.create=false --set serviceAccount.name=aws-load-balancer-controller
 
 kubectl get pods -n kube-system
 ```

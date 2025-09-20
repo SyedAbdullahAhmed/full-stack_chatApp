@@ -11,7 +11,7 @@ metadata:
     alb.ingress.kubernetes.io/group.name: chatapp
 spec:
   rules:
-  - host: k8s-default-appingre-d8b2371928-670778782.us-east-1.elb.amazonaws.com
+  - host: k8s-chatapp-96bfa4e77f-1403137265.us-east-1.elb.amazonaws.com
     http:
       paths:
       - path: /
@@ -20,7 +20,7 @@ spec:
           service:
             name: frontend
             port:
-              number: 80
+              number: 5173
       - path: /api
         pathType: Prefix
         backend:
