@@ -33,56 +33,173 @@
 //     }
 //   }
 // }
+// pipeline {
+//   agent any
+
+//   environment {
+//     SONAR_HOME = tool "Sonar"
+//   }
+
+//   stages {
+//     stage('Clean UP') {
+//       steps {
+//         cleanWs()
+//       }
+//     }
+//     stage('Code Check out') {
+//       steps {
+//         git branch: 'main',
+//           url: 'https://github.com/SyedAbdullahAhmed/full-stack_chatApp.git'
+//       }
+//     }
+//     stage('Code Quality') {
+//       steps {
+//         withSonarQubeEnv("Sonar") {
+//           sh "$SONAR_HOME/bin/sonar-scanner -Dsonar.projectName=chat-app -Dsonar.projectKey=chat-app -X"
+//         }
+//       }
+//     }
+//     stage('OWASP DC') {
+//       steps {
+//           dependencyCheck additionalArguments: '--scan ./backend --format HTML',
+//                           outdir: 'owasp-report',
+//                           odcInstallation: 'dc'
+//       }
+//       post {
+//           always {
+//               dependencyCheckPublisher pattern: 'owasp-report/dependency-check-report.html'
+//           }
+//       }
+//   	}
+//     stage('Sonar Quality Gate Scan') {
+//       steps {
+//         timeout(time: 2, unit: "MINUTES"){
+//           waitForQualityGate abortPipeline: false
+// 		    }
+// 	    }
+//   	}
+//     stage('Trivy File System Scan') {
+//       steps {
+// 		    sh "trivy fs ./backend --format table -o trivy-fs-report.html"
+// 	    }
+//   	}
+//   }
+// }
+
+// pipeline {
+//   agent any
+
+//   environment {
+//     SONAR_HOME = tool "Sonar"
+//   }
+
+//   stages {
+//     stage('Clean UP') {
+//       steps {
+//         cleanWs()
+//       }
+//     }
+//     stage('Code Check out') {
+//       steps {
+//         git branch: 'main',
+//           url: 'https://github.com/SyedAbdullahAhmed/full-stack_chatApp.git'
+//       }
+//     }
+//     stage('Code Quality') {
+//       steps {
+//         withSonarQubeEnv("Sonar") {
+//           sh "$SONAR_HOME/bin/sonar-scanner -Dsonar.projectName=chat-app -Dsonar.projectKey=chat-app -X"
+//         }
+//       }
+//     }
+//     stage('OWASP DC') {
+//       steps {
+//           dependencyCheck additionalArguments: '--scan ./backend --format HTML',
+//                           outdir: 'owasp-report',
+//                           odcInstallation: 'dc'
+//       }
+//       post {
+//           always {
+//               dependencyCheckPublisher pattern: 'owasp-report/dependency-check-report.html'
+//           }
+//       }
+//   	}
+//     stage('Sonar Quality Gate Scan') {
+//       steps {
+//         timeout(time: 2, unit: "MINUTES"){
+//           waitForQualityGate abortPipeline: false
+// 		    }
+// 	    }
+//   	}
+//     stage('Trivy File System Scan') {
+//       steps {
+// 		    sh "trivy fs ./backend --format table -o trivy-fs-report.html"
+// 	    }
+//   	}
+//   }
+// }
+
+
 pipeline {
   agent any
 
   environment {
-    SONAR_HOME = tool "Sonar"
+    DOCKER_REGISTRY = "docker.io"
+    BACKEND_REPO    = "syedabdullahahmed/new-chatapp-backend"
+    FRONTEND_REPO   = "syedabdullahahmed/new-chatapp-frontend"
+    IMAGE_TAG       = "latest"
   }
 
   stages {
-    stage('Clean UP') {
+    stage('Checkout') {
       steps {
-        cleanWs()
-      }
-    }
-    stage('Code Check out') {
-      steps {
+        echo "📥 Cloning repository..."
         git branch: 'main',
-          url: 'https://github.com/SyedAbdullahAhmed/full-stack_chatApp.git'
+            url: 'https://github.com/SyedAbdullahAhmed/full-stack_chatApp.git'
+        echo "✅ Code checkout completed."
       }
     }
-    stage('Code Quality') {
+
+    stage('Docker Login') {
       steps {
-        withSonarQubeEnv("Sonar") {
-          sh "$SONAR_HOME/bin/sonar-scanner -Dsonar.projectName=chat-app -Dsonar.projectKey=chat-app -X"
+        echo "🔑 Logging in to Docker Hub..."
+        withCredentials([usernamePassword(credentialsId: 'docker-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+          sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin $DOCKER_REGISTRY"
         }
+        echo "✅ Docker login successful."
       }
     }
-    stage('OWASP DC') {
+
+    stage('Build Backend Image') {
       steps {
-          dependencyCheck additionalArguments: '--scan ./backend --format HTML',
-                          outdir: 'owasp-report',
-                          odcInstallation: 'dc'
+        echo "🐳 Building backend Docker image..."
+        sh "docker build -t $BACKEND_REPO:$IMAGE_TAG ./backend"
+        echo "✅ Backend image built: $BACKEND_REPO:$IMAGE_TAG"
       }
-      post {
-          always {
-              dependencyCheckPublisher pattern: 'owasp-report/dependency-check-report.html'
-          }
+    }
+
+    stage('Push Backend Image') {
+      steps {
+        echo "📤 Pushing backend image..."
+        sh "docker push $BACKEND_REPO:$IMAGE_TAG"
+        echo "✅ Backend image pushed."
       }
-  	}
-    stage('Sonar Quality Gate Scan') {
+    }
+
+    stage('Build Frontend Image') {
       steps {
-		timeout(time: 2, unit: "MINUTES"){
-			waitForQualityGate abortPipeline: false
-		}
-	  }
-  	}
-    stage('Trivy File System Scan') {
+        echo "🐳 Building frontend Docker image..."
+        sh "docker build -t $FRONTEND_REPO:$IMAGE_TAG ./frontend"
+        echo "✅ Frontend image built: $FRONTEND_REPO:$IMAGE_TAG"
+      }
+    }
+
+    stage('Push Frontend Image') {
       steps {
-		sh "trivy fs --format table -o trivy-fs-report.html"
-	  }
-  	}
+        echo "📤 Pushing frontend image..."
+        sh "docker push $FRONTEND_REPO:$IMAGE_TAG"
+        echo "✅ Frontend image pushed."
+      }
+    }
   }
 }
-
