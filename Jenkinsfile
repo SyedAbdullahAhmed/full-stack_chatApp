@@ -212,8 +212,27 @@ pipeline {
     BACKEND_REPO    = "syedabdullahahmed/new-chatapp-backend"
     FRONTEND_REPO   = "syedabdullahahmed/new-chatapp-frontend"    
   }
-
+  
   stages {
+    stage('Skip if only k8s changes') {
+  steps {
+    script {
+      def changes = sh(
+        script: "git diff --name-only origin/main...HEAD",
+        returnStdout: true
+      ).trim().split("\n")
+
+      if (changes.every { it.startsWith("k8s/") }) {
+        echo "🛑 Only k8s/ files changed. Skipping build."
+        currentBuild.result = 'SUCCESS'
+        error("Stopping pipeline since only k8s/ changed")
+      } else {
+        echo "✅ Changes detected outside k8s/, continuing..."
+      }
+    }
+  }
+}
+
     stage('Checkout') {
       steps {
         echo "📥 Cloning repository..."
@@ -285,21 +304,21 @@ pipeline {
       }
     }
 
-     // stage('Commit & Push Manifests') {
-     //        steps {
-     //            withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
-     //                sh """
-     //                git config --global user.email "abdullahahmedsyed65@gmail.com"
-     //                git config --global user.name "SyedAbdullahAhmed"
-     //                git remote set-url origin https://$GIT_USER:$GIT_PASS@github.com/SyedAbdullahAhmed/full-stack_chatApp.git
-     //                git add .
-     //                git commit -m "Update deployment image tag to ${IMAGE_TAG}" || echo "No changes to commit"
-     //                git push origin main
-     //                """
-     //            }
+     stage('Commit & Push Manifests') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+                    sh """
+                    git config --global user.email "abdullahahmedsyed65@gmail.com"
+                    git config --global user.name "SyedAbdullahAhmed"
+                    git remote set-url origin https://$GIT_USER:$GIT_PASS@github.com/SyedAbdullahAhmed/full-stack_chatApp.git
+                    git add .
+                    git commit -m "Update deployment image tag to ${IMAGE_TAG}" || echo "No changes to commit"
+                    git push origin main
+                    """
+                }
 
-     //        }
-     //    }
+            }
+        }
   }
   post {
         success {
