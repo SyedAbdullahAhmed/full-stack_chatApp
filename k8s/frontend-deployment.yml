@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: chatapp-frontend
-        image: syedabdullahahmed/new-chatapp-frontend:12
+        image: syedabdullahahmed/new-chatapp-frontend:13
         ports:
         - containerPort: 5173
         env:
