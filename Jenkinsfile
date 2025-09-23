@@ -146,8 +146,8 @@ pipeline {
   environment {
     DOCKER_REGISTRY = "docker.io"
     BACKEND_REPO    = "syedabdullahahmed/new-chatapp-backend"
-    FRONTEND_REPO   = "syedabdullahahmed/new-chatapp-frontend"
     IMAGE_TAG       = "latest"
+    FRONTEND_REPO   = "syedabdullahahmed/new-chatapp-frontend"
   }
 
   stages {
