@@ -302,22 +302,27 @@ pipeline {
       }
     }
 
-     stage('Commit & Push Manifests') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
-                    sh """
-                    git config --global user.email "abdullahahmedsyed65@gmail.com"
-                    git config --global user.name "SyedAbdullahAhmed"
-                    git remote set-url origin https://$GIT_USER:$GIT_PASS@github.com/SyedAbdullahAhmed/full-stack_chatApp.git
-                    git add .
-                    git commit -m "Update deployment image tag to ${IMAGE_TAG}" || echo "No changes to commit"
-                    git fetch --all
-                    git push origin gitops
-                    """
-                }
+    stage('Commit & Push Manifests') {
+    steps {
+        withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+            sh """
+            git config --global user.email "abdullahahmedsyed65@gmail.com"
+            git config --global user.name "SyedAbdullahAhmed"
 
-            }
+            # Ensure branch exists (create if not)
+            git fetch origin
+            git checkout -B gitops
+
+            git add k8s/
+            git commit -m "Update deployment image tag to ${IMAGE_TAG}" || echo "No changes to commit"
+
+            # Push branch explicitly
+            git push https://$GIT_USER:$GIT_PASS@github.com/SyedAbdullahAhmed/full-stack_chatApp.git gitops --force
+            """
         }
+    }
+}
+
   }
   post {
         success {
