@@ -311,6 +311,7 @@ pipeline {
                     git remote set-url origin https://$GIT_USER:$GIT_PASS@github.com/SyedAbdullahAhmed/full-stack_chatApp.git
                     git add .
                     git commit -m "Update deployment image tag to ${IMAGE_TAG}" || echo "No changes to commit"
+                    git fetch --all
                     git push origin gitops
                     """
                 }
