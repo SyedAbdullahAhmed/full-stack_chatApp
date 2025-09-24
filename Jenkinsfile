@@ -221,12 +221,24 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        echo "📥 Cloning repository..."
-        git branch: 'main',
-            url: 'https://github.com/SyedAbdullahAhmed/full-stack_chatApp.git'
-        echo "✅ Code checkout completed."
+        script {
+          if (fileExists('.git')) {
+            echo "📂 Repo already exists, pulling latest changes..."
+            sh """
+              git reset --hard
+              git clean -fd
+              git pull origin main
+            """
+          } else {
+            echo "📥 Cloning fresh repository..."
+            git branch: 'main',
+                url: 'https://github.com/SyedAbdullahAhmed/full-stack_chatApp.git'
+          }
+        }
+        echo "✅ Checkout completed."
       }
     }
+
 
     stage('Docker Login') {
       steps {
