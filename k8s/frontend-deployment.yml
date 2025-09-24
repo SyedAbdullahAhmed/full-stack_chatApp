@@ -25,7 +25,7 @@ spec:
           value: production
         - name: VITE_APP_URL
           # value: http://backend.chat-app.svc.cluster.local:5001 # for internal svc if alb not needed
-          value: http://k8s-chatapp-96bfa4e77f-1403137265.us-east-1.elb.amazonaws.com # if alb needed
+          value: http://k8s-chatapp-96bfa4e77f-974437340.us-east-1.elb.amazonaws.com # if alb needed
           
 
 

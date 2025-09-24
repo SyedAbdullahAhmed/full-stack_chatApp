@@ -11,8 +11,8 @@ metadata:
     alb.ingress.kubernetes.io/group.name: chatapp
 spec:
   rules:
-  - host: k8s-chatapp-96bfa4e77f-1403137265.us-east-1.elb.amazonaws.com
-    http:
+  # - host: k8s-chatapp-96bfa4e77f-976005596.us-east-1.elb.amazonaws.com
+  - http:
       paths:
       - path: /
         pathType: Prefix

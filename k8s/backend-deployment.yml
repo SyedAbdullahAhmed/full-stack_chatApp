@@ -24,7 +24,8 @@ spec:
         - name: NODE_ENV
           value: production
         - name: URL
-          value: http://frontend.chat-app.svc.cluster.local:5173
+          # value: http://frontend.chat-app.svc.cluster.local:5173
+          value: http://k8s-chatapp-96bfa4e77f-974437340.us-east-1.elb.amazonaws.com
         - name: MONGODB_URI
           value: "mongodb://mongoadmin:secret@mongodb:27017/dbname?authSource=admin"
         - name: JWT_SECRET

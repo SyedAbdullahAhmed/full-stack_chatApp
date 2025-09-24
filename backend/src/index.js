@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(cookieParser());
 const allowedOrigins = [
   "http://localhost:5173", // local dev
-  "http://k8s-chatapp-96bfa4e77f-1403137265.us-east-1.elb.amazonaws.com", // ALB
+  process.env.URL, // ALB
 ];
 
 app.use(
