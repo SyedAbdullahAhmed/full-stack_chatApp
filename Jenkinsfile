@@ -306,21 +306,21 @@ pipeline {
       }
     }
 
-     stage('Commit & Push Manifests') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
-                    sh """
-                    git config --global user.email "abdullahahmedsyed65@gmail.com"
-                    git config --global user.name "SyedAbdullahAhmed"
-                    git remote set-url origin https://$GIT_USER:$GIT_PASS@github.com/SyedAbdullahAhmed/full-stack_chatApp.git
-                    git add .
-                    git commit -m "Update deployment image tag to ${IMAGE_TAG}" || echo "No changes to commit"
-                    git push origin main
-                    """
-                }
+     // stage('Commit & Push Manifests') {
+     //        steps {
+     //            withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+     //                sh """
+     //                git config --global user.email "abdullahahmedsyed65@gmail.com"
+     //                git config --global user.name "SyedAbdullahAhmed"
+     //                git remote set-url origin https://$GIT_USER:$GIT_PASS@github.com/SyedAbdullahAhmed/full-stack_chatApp.git
+     //                git add .
+     //                git commit -m "Update deployment image tag to ${IMAGE_TAG}" || echo "No changes to commit"
+     //                git push origin main
+     //                """
+     //            }
 
-            }
-        }
+     //        }
+     //    }
   }
   post {
         success {
