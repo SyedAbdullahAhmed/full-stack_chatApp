@@ -217,27 +217,27 @@ pipeline {
     stage('Skip if only k8s changes') {
   steps {
     script {
-      // Make sure we have up-to-date main
       sh "git fetch origin main"
 
       def changes = sh(
-        script: "git diff --name-only FETCH_HEAD...HEAD",
+        script: "git diff --name-only origin/main...HEAD",
         returnStdout: true
       ).trim().split("\n")
 
       echo "Changed files: ${changes}"
 
-      // Skip if only infra files
       if (changes && changes.every { it.startsWith("k8s/") || it == "Jenkinsfile" }) {
-        echo "🛑 Only k8s/ files or Jenkinsfile changed. Skipping build."
-        currentBuild.result = 'SUCCESS'
-        return
+        echo "🛑 Only k8s/ files or Jenkinsfile changed. Skipping pipeline."
+        catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
+          error("Pipeline skipped — only infra changes.")
+        }
       } else {
         echo "✅ Relevant changes detected (frontend/backend/etc), continuing..."
       }
     }
   }
 }
+
 
 
 
