@@ -214,9 +214,11 @@ pipeline {
   }
   
   stages {
-    stage('Skip if only k8s changes') {
+  stage('Skip if only k8s changes') {
   steps {
     script {
+      // Ensure we have latest main with history
+      sh "git fetch --unshallow || true"
       sh "git fetch origin main"
 
       def changes = sh(
@@ -224,15 +226,19 @@ pipeline {
         returnStdout: true
       ).trim().split("\n")
 
+      if (changes == [""]) {
+        changes = []
+      }
+
       echo "Changed files: ${changes}"
 
       if (changes && changes.every { it.startsWith("k8s/") || it == "Jenkinsfile" }) {
-        echo "🛑 Only k8s/ files or Jenkinsfile changed. Skipping pipeline."
+        echo "🛑 Only infra files changed. Skipping pipeline."
         catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
           error("Pipeline skipped — only infra changes.")
         }
       } else {
-        echo "✅ Relevant changes detected (frontend/backend/etc), continuing..."
+        echo "✅ Relevant changes detected. Continuing..."
       }
     }
   }
