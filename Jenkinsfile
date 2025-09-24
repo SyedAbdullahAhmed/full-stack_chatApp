@@ -212,37 +212,7 @@ pipeline {
     BACKEND_REPO    = "syedabdullahahmed/new-chatapp-backend"
     FRONTEND_REPO   = "syedabdullahahmed/new-chatapp-frontend"    
   }
-  
-  stages {
-  stage('Skip if only k8s changes') {
-  steps {
-    script {
-      // Ensure we have latest main with history
-      sh "git fetch --unshallow || true"
-      sh "git fetch origin main"
 
-      def changes = sh(
-        script: "git diff --name-only origin/main...HEAD",
-        returnStdout: true
-      ).trim().split("\n")
-
-      if (changes == [""]) {
-        changes = []
-      }
-
-      echo "Changed files: ${changes}"
-
-      if (changes && changes.every { it.startsWith("k8s/") || it == "Jenkinsfile" }) {
-        echo "🛑 Only infra files changed. Skipping pipeline."
-        catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
-          error("Pipeline skipped — only infra changes.")
-        }
-      } else {
-        echo "✅ Relevant changes detected. Continuing..."
-      }
-    }
-  }
-}
 
 
 
